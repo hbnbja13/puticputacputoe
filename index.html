@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unbeatable Tic Tac Toe</title>
+  <style>
+body {
+  background: #191a1b;
+  color: #c7c7c7;
+  font-family:"Consolas", "Liberation Mono", "Menlo", monospace;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1 {
+  color: #6ec07a;  /* Debian prompt green */
+  background: #232323;
+  font-weight: bold;
+  font-size: 2.2em;
+  padding: 18px 38px 15px 38px;
+  border-radius: 9px;
+  margin-bottom: 10px;
+  box-shadow: none;
+  letter-spacing: 2px;
+}
+.game-container {
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 0 20px #111a;
+  padding: 24px 28px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ai-toggle, .player-selection {
+  background: none;
+  box-shadow: none;
+  color: #e6e6e6;
+  border: none;
+  padding: 0 0 12px 0;
+}
+.ai-toggle label {
+  color: #77c5d5;
+  font-weight: bold;
+  font-size: 1.04em;
+}
+.ai-toggle input[type="checkbox"] {
+  accent-color: #6ec07a;
+}
+.player-selection button {
+  background: #212;
+  color: #c7c7c7;
+  border: 1px solid #444;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  padding: 6px 24px;
+  margin: 0 6px;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.player-selection button:hover {
+  background: #313;
+  color: #6ec07a;
+  border-color: #6ec07a;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 46px);
+  grid-gap: 2px;
+  margin: 16px 0 20px 0;
+}
+.cell {
+  width: 46px;
+  height: 46px;
+  background: #111;
+  color: #c7c7c7;
+  border: 1.5px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  font-family: inherit;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.17s, color 0.17s, border 0.17s;
+  position: relative;
+  box-shadow: none;
+}
+.cell:hover {
+  background: #23282d;
+  border-color: #6ec07a;
+  color: #e6c07a;
+}
+.cell.x .player-mark {
+  color: #d04a39; /* Debian red */
+}
+.cell.o .player-mark {
+  color: #4078c0; /* Debian blue */
+}
+.status {
+  font-family: inherit;
+  font-size: 1.06em;
+  color: #d3cfa5;
+  background: #16171c;
+  border-left: 4px solid #6ec07a;
+  padding: 4px 15px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+.reset-btn {
+  background: #232;
+  color: #d5e6c5;
+  border: 1px solid #6ec07a;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 1em;
+  padding: 7px 22px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.reset-btn:hover {
+  background: #303c29;
+  color: #fff;
+}
+.mini-index {
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  font-size: 9px;
+  color: #5b5b5b;
+  opacity: 0.7;
+  user-select: none;
+  pointer-events: none;
+}
+.player-mark {
+  font-size: 1.6em;
+  font-family: inherit;
+  font-weight: bold;
+  z-index: 1;
+}
+@media (max-width: 600px) {
+  .board { grid-template-columns: repeat(3, 30px); }
+  .cell { width: 30px; height: 30px; font-size: 1.05em; }
+}
+
+  </style>
+</head>
+<body>
+  <h1>puTic puTac puToe</h1>
+  <div class="game-container">
+    <!-- AI difficulty toggle -->
+    <div class="ai-toggle">
+      <label>
+        <input type="checkbox" id="ai-optimal-toggle" checked style="width: 16px; height: 16px; vertical-align: middle; margin-right: 6px;">
+        Impossible Mode (Always Optimal AI)
+      </label>
+      <div style="font-size: 13px; color: #456; margin: 3px 0 0 0;">
+        Uncheck for "Chill Mode" (AI sometimes plays randomly)
+      </div>
+    </div>
+    <div class="player-selection">
+      <h2>Choose Your Player</h2>
+      <button id="play-as-x">Play as X (First)</button>
+      <button id="play-as-o">Play as O (Second)</button>
+    </div>
+    <div class="status" id="status">Select your player to start</div>
+    <div class="board" id="board">
+      <div class="cell" data-index="1"><span class="mini-index">1</span></div>
+      <div class="cell" data-index="2"><span class="mini-index">2</span></div>
+      <div class="cell" data-index="3"><span class="mini-index">3</span></div>
+      <div class="cell" data-index="4"><span class="mini-index">4</span></div>
+      <div class="cell" data-index="5"><span class="mini-index">5</span></div>
+      <div class="cell" data-index="6"><span class="mini-index">6</span></div>
+      <div class="cell" data-index="7"><span class="mini-index">7</span></div>
+      <div class="cell" data-index="8"><span class="mini-index">8</span></div>
+      <div class="cell" data-index="9"><span class="mini-index">9</span></div>
+    </div>
+    <button class="reset-btn" id="reset-btn">Reset Game</button>
+  </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cells = document.querySelectorAll('.cell');
+      const status = document.getElementById('status');
+      const resetBtn = document.getElementById('reset-btn');
+      const playAsXBtn = document.getElementById('play-as-x');
+      const playAsOBtn = document.getElementById('play-as-o');
+      const aiOptimalToggle = document.getElementById('ai-optimal-toggle');
+
+      let gameState = ['', '', '', '', '', '', '', '', '', '']; // index 1-9
+      let currentPlayer = 'X';
+      let gameActive = false;
+      let humanPlayer = '';
+      let aiPlayer = '';
+      let aiAlwaysOptimal = aiOptimalToggle.checked;
+
+      const winningConditions = [
+        [1, 2, 3], [4, 5, 6], [7, 8, 9],
+        [1, 4, 7], [2, 5, 8], [3, 6, 9],
+        [1, 5, 9], [3, 5, 7]
+      ];
+
+      aiOptimalToggle.addEventListener('change', () => {
+        aiAlwaysOptimal = aiOptimalToggle.checked;
+        if (!humanPlayer) {
+          status.textContent = 'Select your player to start';
+        } else if (aiAlwaysOptimal) {
+          status.textContent = `Impossible Mode: AI is always optimal.`;
+        } else {
+          status.textContent = `Chill Mode: AI sometimes plays randomly.`;
+        }
+      });
+
+      function initGame() {
+        cells.forEach(cell => {
+          cell.addEventListener('click', handleCellClick);
+          cell.textContent = '';
+          cell.classList.remove('x', 'o');
+        });
+        resetBtn.addEventListener('click', resetGame);
+        playAsXBtn.addEventListener('click', () => selectPlayer('X'));
+        playAsOBtn.addEventListener('click', () => selectPlayer('O'));
+        status.textContent = 'Select your player to start';
+        gameActive = false;
+        document.removeEventListener('keydown', handleKeyPress);
+        document.addEventListener('keydown', handleKeyPress);
+      }
+
+      function selectPlayer(player) {
+        humanPlayer = player;
+        aiPlayer = player === 'X' ? 'O' : 'X';
+        resetGame(true);
+      }
+
+      function handleCellClick(event) {
+        let clickedCell = event.target;
+        if (!clickedCell.classList.contains('cell')) {
+          clickedCell = clickedCell.closest('.cell');
+        }
+        if (!gameActive || !clickedCell) return;
+
+        const index = parseInt(clickedCell.getAttribute('data-index'));
+        if (gameState[index] !== '') return;
+
+        makeMove(index, humanPlayer);
+        if (gameActive) setTimeout(makeAiMove, 500);
+      }
+
+      function makeMove(index, player) {
+        gameState[index] = player;
+        const cell = document.querySelector(`[data-index="${index}"]`);
+        const oldMark = cell.querySelector('.player-mark');
+        if (oldMark) oldMark.remove();
+
+        const playerMark = document.createElement('div');
+        playerMark.className = 'player-mark';
+        playerMark.textContent = player;
+        cell.appendChild(playerMark);
+
+        cell.classList.add(player.toLowerCase());
+
+        if (checkWin(player)) {
+          status.textContent = `${player} wins! Restarting in 2 seconds...`;
+          gameActive = false;
+          setTimeout(() => resetGame(true), 2000);
+          return;
+        }
+        if (checkDraw()) {
+          status.textContent = 'Game ended in a draw! Restarting in 2 seconds...';
+          gameActive = false;
+          setTimeout(() => resetGame(true), 2000);
+          return;
+        }
+
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        status.textContent = (humanPlayer && aiPlayer)
+          ? (currentPlayer === humanPlayer ? "Your turn" : "AI's turn")
+          : `${currentPlayer}'s turn`;
+      }
+
+      function makeAiMove() {
+        if (!gameActive) return;
+        // Random vs Optimal depending on toggle
+        if (!aiAlwaysOptimal && Math.random() < 0.5) {
+          // Random move
+          const available = [];
+          for (let i = 1; i <= 9; i++) {
+            if (gameState[i] === '') available.push(i);
+          }
+          if (available.length === 0) return;
+          const randomIndex = available[Math.floor(Math.random() * available.length)];
+          makeMove(randomIndex, aiPlayer);
+        } else {
+          // Optimal/minimax move
+          let bestMove = -1;
+          let bestScore = -Infinity;
+          let alpha = -Infinity;
+          let beta = Infinity;
+          for (let i = 1; i <= 9; i++) {
+            if (gameState[i] === '') {
+              gameState[i] = aiPlayer;
+              let score = minimax([...gameState], 0, false, alpha, beta);
+              gameState[i] = '';
+              if (score > bestScore) {
+                bestScore = score;
+                bestMove = i;
+              }
+              alpha = Math.max(alpha, bestScore);
+              if (beta <= alpha) break;
+            }
+          }
+          if (bestMove !== -1) {
+            makeMove(bestMove, aiPlayer);
+          }
+        }
+      }
+
+      function minimax(board, depth, isMaximizing, alpha, beta) {
+        if (checkWinForBoard(board, aiPlayer)) return 10 - depth;
+        if (checkWinForBoard(board, humanPlayer)) return depth - 10;
+        if (checkDrawForBoard(board)) return 0;
+
+        if (isMaximizing) {
+          let bestScore = -Infinity;
+          for (let i = 1; i <= 9; i++) {
+            if (board[i] === '') {
+              board[i] = aiPlayer;
+              let score = minimax([...board], depth + 1, false, alpha, beta);
+              board[i] = '';
+              bestScore = Math.max(score, bestScore);
+              alpha = Math.max(alpha, bestScore);
+              if (beta <= alpha) break;
+            }
+          }
+          return bestScore;
+        } else {
+          let bestScore = Infinity;
+          for (let i = 1; i <= 9; i++) {
+            if (board[i] === '') {
+              board[i] = humanPlayer;
+              let score = minimax([...board], depth + 1, true, alpha, beta);
+              board[i] = '';
+              bestScore = Math.min(score, bestScore);
+              beta = Math.min(beta, bestScore);
+              if (beta <= alpha) break;
+            }
+          }
+          return bestScore;
+        }
+      }
+
+      function checkWinForBoard(board, player) {
+        return winningConditions.some(condition =>
+          condition.every(index => board[index] === player)
+        );
+      }
+
+      function checkDrawForBoard(board) {
+        for (let i = 1; i <= 9; i++) {
+          if (board[i] === '') return false;
+        }
+        return true;
+      }
+
+      function checkWin(player) {
+        return winningConditions.some(condition =>
+          condition.every(index => gameState[index] === player)
+        );
+      }
+
+      function checkDraw() {
+        return gameState.slice(1).every(cell => cell !== '');
+      }
+
+      function resetGame(triggerAiMove = true) {
+        gameState = ['', '', '', '', '', '', '', '', '', ''];
+        currentPlayer = 'X';
+
+        cells.forEach(cell => {
+          const index = cell.getAttribute('data-index');
+          cell.innerHTML = '<span class="mini-index">' + index + '</span>';
+          cell.classList.remove('x', 'o');
+        });
+
+        if (humanPlayer) {
+          status.textContent = aiAlwaysOptimal
+            ? `Impossible Mode: AI is always optimal.`
+            : `Chill Mode: AI sometimes plays randomly.`;
+          gameActive = true;
+          // If AI goes first
+          if (aiPlayer === 'X' && triggerAiMove) {
+            setTimeout(makeAiMove, 500);
+          }
+        } else {
+          status.textContent = 'Select your player to start';
+          gameActive = false;
+        }
+      }
+
+      // Keyboard Input Handler for numpad/number row positions
+      function handleKeyPress(event) {
+        if (!gameActive) return;
+
+        const key = event.key;
+        if (!/^[1-9]$/.test(key)) return;
+
+        const index = parseInt(key);
+
+        // Remap keyboard 1-9 to desired cell indices
+        const keyMap = {
+          1: 7,
+          2: 8,
+          3: 9,
+          4: 4,
+          5: 5,
+          6: 6,
+          7: 1,
+          8: 2,
+          9: 3
+        };
+
+        const mappedIndex = keyMap[index];
+
+        const cell = document.querySelector(`[data-index="${mappedIndex}"]`);
+
+        if (!cell || gameState[mappedIndex] !== '') {
+          return;
+        }
+
+        makeMove(mappedIndex, humanPlayer);
+        if (gameActive) setTimeout(makeAiMove, 500);
+      }
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'x' || event.key === 'X') {
+      playAsXBtn.click();
+    } else if (event.key === 'o' || event.key === 'O') {
+      playAsOBtn.click();
+    }
+});
+
+
+      initGame();
+    });
+</script>
+</body>
+</html>
